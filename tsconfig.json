@@ -1,0 +1,6 @@
+{
+  "extends": "@kont/config/tsconfig.base.json",
+  "compilerOptions": {
+    "strictNullChecks": true
+  }
+}
