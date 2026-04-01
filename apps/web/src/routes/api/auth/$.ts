@@ -1,3 +1,4 @@
+// biome-ignore lint/style/useFilenamingConvention: Splat route naming required by TanStack Router.
 import { createFileRoute } from "@tanstack/react-router";
 
 import { handler } from "@/lib/auth-server";

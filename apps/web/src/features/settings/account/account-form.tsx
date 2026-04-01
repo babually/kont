@@ -88,7 +88,7 @@ export function AccountForm() {
 			dob: undefined as Date | undefined,
 			language: "",
 		} as AccountFormValues,
-		onSubmit: async ({ value }) => {
+		onSubmit: ({ value }) => {
 			//   showSubmittedData(value)
 			console.log(value);
 		},

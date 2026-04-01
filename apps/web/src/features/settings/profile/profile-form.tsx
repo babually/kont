@@ -67,7 +67,7 @@ export function ProfileForm() {
 		validators: {
 			onChange: profileFormSchema,
 		},
-		onSubmit: async ({ value }) => {
+		onSubmit: ({ value }) => {
 			console.log("Profile data:", value);
 			toast.success("Profile updated successfully!", {
 				description: "Your profile has been updated.",

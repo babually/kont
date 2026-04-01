@@ -66,14 +66,16 @@ export function AppearanceForm() {
 				form.handleSubmit();
 			}}
 		>
-			<form.Field
-				children={(field) => (
+			<form.Field name="font">
+				{(field) => (
 					<Field>
 						<FieldLabel>Font</FieldLabel>
 						<div className="relative w-max">
 							<Select
 								onOpenChange={() => field.handleBlur()}
-								onValueChange={(val) => field.handleChange(val as any)}
+								onValueChange={(val) =>
+									field.handleChange(val as (typeof fonts)[number])
+								}
 								value={field.state.value}
 							>
 								<SelectTrigger className="w-[180px]">
@@ -97,11 +99,10 @@ export function AppearanceForm() {
 						</FieldDescription>
 					</Field>
 				)}
-				name="font"
-			/>
+			</form.Field>
 
-			<form.Field
-				children={(field) => (
+			<form.Field name="theme">
+				{(field) => (
 					<div>
 						<FieldLabel>Theme</FieldLabel>
 						<FieldDescription>
@@ -175,8 +176,7 @@ export function AppearanceForm() {
 						</RadioGroup>
 					</div>
 				)}
-				name="theme"
-			/>
+			</form.Field>
 
 			<form.Subscribe
 				selector={(state) => [state.canSubmit, state.isSubmitting] as const}

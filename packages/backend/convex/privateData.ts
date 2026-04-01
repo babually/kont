@@ -1,3 +1,4 @@
+// biome-ignore lint/style/useFilenamingConvention: Convex uses the filename for API pathing.
 import { query } from "./_generated/server";
 import { authComponent } from "./auth";
 
