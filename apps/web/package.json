@@ -9,6 +9,7 @@
   },
   "dependencies": {
     "@convex-dev/better-auth": "catalog:",
+    "@convex-dev/r2": "^0.9.1",
     "@convex-dev/react-query": "^0.1.0",
     "@kont/backend": "workspace:*",
     "@kont/env": "workspace:*",
@@ -23,6 +24,7 @@
     "@tanstack/router-plugin": "^1.141.1",
     "better-auth": "catalog:",
     "convex": "catalog:",
+    "date-fns": "^4.1.0",
     "dotenv": "catalog:",
     "lucide-react": "catalog:",
     "next-themes": "catalog:",
