@@ -2,11 +2,14 @@ import { convexQuery } from "@convex-dev/react-query";
 import { api } from "@kont/backend/convex/_generated/api";
 import type { Id } from "@kont/backend/convex/_generated/dataModel";
 import { Button } from "@kont/ui/components/button";
+import { DialogHeader, DialogTitle } from "@kont/ui/components/dialog";
 import { FieldGroup, FieldLabel } from "@kont/ui/components/field";
 import { Input } from "@kont/ui/components/input";
+import { Label } from "@kont/ui/components/label";
 import { useQueryClient, useSuspenseQuery } from "@tanstack/react-query";
 import { useMutation } from "convex/react";
-import { useEffect, useState } from "react";
+import { Camera } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import { ImageUpload } from "@/functions/image-upload";
 
 interface ContactFormProps {
@@ -141,152 +144,179 @@ export function ContactForm({ contactId, onClose }: ContactFormProps) {
 		}));
 	};
 
-	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-			<div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg bg-white shadow-xl">
-				<div className="p-6">
-					<div className="mb-6 flex items-center justify-between">
-						<h2 className="font-bold text-gray-900 text-xl">
-							{contactId ? "Edit Contact" : "Add Contact"}
-						</h2>
-						<button
-							className="text-gray-400 hover:text-gray-600"
-							onClick={onClose}
-							type="button"
-						>
-							✕
-						</button>
-					</div>
+	const imageUploadRef =
+		useRef<import("@/functions/image-upload").ImageUploadHandle>(null);
 
-					<form className="space-y-4" onSubmit={handleSubmit}>
-						{error && (
-							<div className="rounded-md border border-red-200 bg-red-50 px-3 py-2 text-red-700 text-sm">
-								{error}
-							</div>
-						)}
-						<div className="grid gap-4">
-							<div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-full shadow-md">
+	return (
+		<div className="flex flex-col gap-6">
+			<DialogHeader>
+				<DialogTitle>{contactId ? "Edit Contact" : "Add Contact"}</DialogTitle>
+			</DialogHeader>
+
+			<form className="space-y-4" onSubmit={handleSubmit}>
+				{error && (
+					<div className="rounded-md border border-destructive/20 bg-destructive/10 px-3 py-2 text-destructive text-sm">
+						{error}
+					</div>
+				)}
+				<div className="flex items-center gap-6">
+					<div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-muted shadow-sm">
+						{formData.image ? (
+							<ImageUpload
+								className="h-full w-full"
+								onRemove={() => {
+									setFormData((prev) => ({ ...prev, image: "" }));
+								}}
+								onUploadComplete={(key) => {
+									setFormData((prev) => ({ ...prev, image: key }));
+								}}
+								ref={imageUploadRef}
+								value={formData.image}
+							/>
+						) : (
+							<div className="flex h-full w-full items-center justify-center bg-muted text-muted-foreground">
+								<Camera className="h-8 w-8" />
 								<ImageUpload
+									className="hidden"
 									onRemove={() => {
 										setFormData((prev) => ({ ...prev, image: "" }));
 									}}
 									onUploadComplete={(key) => {
 										setFormData((prev) => ({ ...prev, image: key }));
 									}}
-									value={formData.image}
+									ref={imageUploadRef}
 								/>
 							</div>
-							<FieldGroup>
-								<FieldGroup>
-									<FieldLabel htmlFor="fullName">Full Name</FieldLabel>
-									<Input
-										autoComplete="off"
-										id="fullName"
-										name="fullName"
-										onChange={handleChange}
-										placeholder="John Doe"
-										required
-										value={formData.fullName}
-									/>
-								</FieldGroup>
-
-								<FieldGroup>
-									<FieldLabel htmlFor="email">Email Address</FieldLabel>
-									<Input
-										autoComplete="off"
-										id="email"
-										name="email"
-										onChange={handleChange}
-										placeholder="contact@email.com"
-										type="email"
-										value={formData.email}
-									/>
-								</FieldGroup>
-
-								<FieldGroup>
-									<FieldLabel htmlFor="phone">Phone Number</FieldLabel>
-									<Input
-										autoComplete="off"
-										id="phone"
-										name="phone"
-										onChange={handleChange}
-										placeholder="+(xxx) xxx-xxxx"
-										value={formData.phone}
-									/>
-								</FieldGroup>
-
-								<FieldGroup>
-									<FieldLabel htmlFor="company">Company Name</FieldLabel>
-									<Input
-										autoComplete="off"
-										id="company"
-										name="company"
-										onChange={handleChange}
-										placeholder="Acme Inc."
-										value={formData.company}
-									/>
-								</FieldGroup>
-
-								<FieldGroup>
-									<FieldLabel htmlFor="jobTitle">Job Title</FieldLabel>
-									<Input
-										autoComplete="off"
-										id="jobTitle"
-										name="jobTitle"
-										onChange={handleChange}
-										placeholder="Software Engineer"
-										required
-										value={formData.jobTitle}
-									/>
-								</FieldGroup>
-
-								<FieldGroup>
-									<FieldLabel htmlFor="position">Position</FieldLabel>
-									<Input
-										autoComplete="off"
-										id="position"
-										name="position"
-										onChange={handleChange}
-										placeholder="CEO, Manager, Designer"
-										value={formData.position}
-									/>
-								</FieldGroup>
-
-								<FieldGroup>
-									<FieldLabel htmlFor="tags">Tags (comma-separated)</FieldLabel>
-									<Input
-										autoComplete="off"
-										id="tags"
-										name="tags"
-										onChange={handleChange}
-										placeholder="client, important, follow-up"
-										value={formData.tags}
-									/>
-								</FieldGroup>
-
-								<div className="flex gap-3 pt-4">
-									<Button
-										className="flex-1 rounded-md bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-										disabled={isSubmitting}
-										type="submit"
-									>
-										{isSubmitting
-											? "Saving..."
-											: `${contactId ? "Update" : "Create"} Contact`}
-									</Button>
-									<Button
-										className="flex-1 rounded-md bg-gray-300 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-400"
-										onClick={onClose}
-										type="button"
-									>
-										Cancel
-									</Button>
-								</div>
-							</FieldGroup>
+						)}
+					</div>
+					<div className="space-y-2">
+						<Label htmlFor="picture">Profile Picture</Label>
+						<div>
+							<Button
+								className="w-fit"
+								onClick={() => imageUploadRef.current?.triggerUpload()}
+								size="sm"
+								type="button"
+								variant="outline"
+							>
+								<Camera className="mr-2 h-4 w-4" />
+								{formData.image ? "Change Picture" : "Upload Picture"}
+							</Button>
 						</div>
-					</form>
+					</div>
 				</div>
-			</div>
+				<div className="">
+					<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+						<FieldGroup>
+							<FieldLabel htmlFor="fullName">Full Name</FieldLabel>
+							<Input
+								autoComplete="off"
+								id="fullName"
+								name="fullName"
+								onChange={handleChange}
+								placeholder="John Doe"
+								required
+								value={formData.fullName}
+							/>
+						</FieldGroup>
+
+						<FieldGroup>
+							<FieldLabel htmlFor="email">Email Address</FieldLabel>
+							<Input
+								autoComplete="off"
+								id="email"
+								name="email"
+								onChange={handleChange}
+								placeholder="contact@email.com"
+								type="email"
+								value={formData.email}
+							/>
+						</FieldGroup>
+
+						<FieldGroup>
+							<FieldLabel htmlFor="phone">Phone Number</FieldLabel>
+							<Input
+								autoComplete="off"
+								id="phone"
+								name="phone"
+								onChange={handleChange}
+								placeholder="+(xxx) xxx-xxxx"
+								value={formData.phone}
+							/>
+						</FieldGroup>
+
+						<FieldGroup>
+							<FieldLabel htmlFor="company">Company Name</FieldLabel>
+							<Input
+								autoComplete="off"
+								id="company"
+								name="company"
+								onChange={handleChange}
+								placeholder="Acme Inc."
+								value={formData.company}
+							/>
+						</FieldGroup>
+
+						<FieldGroup>
+							<FieldLabel htmlFor="jobTitle">Job Title</FieldLabel>
+							<Input
+								autoComplete="off"
+								id="jobTitle"
+								name="jobTitle"
+								onChange={handleChange}
+								placeholder="Software Engineer"
+								required
+								value={formData.jobTitle}
+							/>
+						</FieldGroup>
+
+						<FieldGroup>
+							<FieldLabel htmlFor="position">Position</FieldLabel>
+							<Input
+								autoComplete="off"
+								id="position"
+								name="position"
+								onChange={handleChange}
+								placeholder="CEO, Manager, Designer"
+								value={formData.position}
+							/>
+						</FieldGroup>
+
+						<FieldGroup className="md:col-span-2">
+							<FieldLabel htmlFor="tags">Tags (comma-separated)</FieldLabel>
+							<Input
+								autoComplete="off"
+								id="tags"
+								name="tags"
+								onChange={handleChange}
+								placeholder="client, important, follow-up"
+								value={formData.tags}
+							/>
+						</FieldGroup>
+
+						<div className="flex gap-3 pt-4 md:col-span-2">
+							<Button
+								className="flex-1"
+								disabled={isSubmitting}
+								type="submit"
+								variant="default"
+							>
+								{isSubmitting
+									? "Saving..."
+									: `${contactId ? "Update" : "Create"} Contact`}
+							</Button>
+							<Button
+								className="flex-1"
+								onClick={onClose}
+								type="button"
+								variant="outline"
+							>
+								Cancel
+							</Button>
+						</div>
+					</div>
+				</div>
+			</form>
 		</div>
 	);
 }

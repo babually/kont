@@ -27,7 +27,7 @@ const sidebarNavItems = [
 
 function SettingsLayout() {
 	return (
-		<div className="w-full px-6 py-6">
+		<div className="min-h-svh w-full p-6 md:p-10">
 			<div className="space-y-1.5 pb-1.5">
 				<h1 className="font-bold text-2xl tracking-tight md:text-3xl">
 					Settings

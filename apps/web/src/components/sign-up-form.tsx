@@ -123,7 +123,7 @@ export default function SignUpForm({
 									value={field.state.value}
 								/>
 								{field.state.meta.errors.map((error) => (
-									<p className="text-red-500" key={error?.message}>
+									<p className="text-destructive" key={error?.message}>
 										{error?.message}
 									</p>
 								))}
@@ -152,7 +152,7 @@ export default function SignUpForm({
 
 			<div className="mt-4 text-center">
 				<Button
-					className="text-indigo-600 hover:text-indigo-800"
+					className="text-primary hover:text-primary/80"
 					onClick={onSwitchToSignIn}
 					variant="link"
 				>

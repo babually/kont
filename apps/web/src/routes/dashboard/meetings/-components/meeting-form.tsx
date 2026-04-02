@@ -1,6 +1,18 @@
 import { convexQuery } from "@convex-dev/react-query";
 import { api } from "@kont/backend/convex/_generated/api";
 import type { Id } from "@kont/backend/convex/_generated/dataModel";
+import { Button } from "@kont/ui/components/button";
+import { DialogHeader, DialogTitle } from "@kont/ui/components/dialog";
+import { Field, FieldGroup, FieldLabel } from "@kont/ui/components/field";
+import { Input } from "@kont/ui/components/input";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@kont/ui/components/select";
+import { Textarea } from "@kont/ui/components/textarea";
 import { useForm } from "@tanstack/react-form";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { useMutation } from "convex/react";
@@ -98,372 +110,319 @@ export function MeetingForm({ meetingId, onClose }: MeetingFormProps) {
 	};
 
 	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-			<div className="max-h-[90vh] w-full max-w-md overflow-y-auto rounded-lg bg-white shadow-xl">
-				<div className="p-6">
-					<div className="mb-6 flex items-center justify-between">
-						<h2 className="font-bold text-gray-900 text-xl">
-							{meetingId ? "Edit Meeting" : "Schedule Meeting"}
-						</h2>
-						<button
-							className="text-gray-400 hover:text-gray-600"
-							onClick={onClose}
-							type="button"
-						>
-							✕
-						</button>
-					</div>
+		<div className="flex flex-col gap-6">
+			<DialogHeader>
+				<DialogTitle>
+					{meetingId ? "Edit Meeting" : "Schedule Meeting"}
+				</DialogTitle>
+			</DialogHeader>
 
-					<form
-						className="space-y-4"
-						onSubmit={(e) => {
-							e.preventDefault();
-							e.stopPropagation();
-							form.handleSubmit();
+			<form
+				className="space-y-4"
+				onSubmit={(e) => {
+					e.preventDefault();
+					e.stopPropagation();
+					form.handleSubmit();
+				}}
+			>
+				<FieldGroup>
+					{/* Title Field */}
+					<form.Field
+						name="title"
+						validators={{
+							onChange: ({ value }) => {
+								if (!value) {
+									return "Title is required";
+								}
+								return undefined;
+							},
 						}}
 					>
-						{/* Title Field */}
+						{(field) => (
+							<Field>
+								<FieldLabel htmlFor={field.name}>Title *</FieldLabel>
+								<Input
+									id={field.name}
+									name={field.name}
+									onBlur={field.handleBlur}
+									onChange={(e) => field.handleChange(e.target.value)}
+									required
+									type="text"
+									value={field.state.value}
+								/>
+								{field.state.meta.isTouched &&
+								field.state.meta.errors.length ? (
+									<p className="mt-1 text-destructive text-sm">
+										{field.state.meta.errors.join(", ")}
+									</p>
+								) : null}
+							</Field>
+						)}
+					</form.Field>
+
+					{/* Contact Field */}
+					<form.Field name="contactId">
+						{(field) => (
+							<Field>
+								<FieldLabel htmlFor={field.name}>Contact</FieldLabel>
+								<Select
+									name={field.name}
+									onValueChange={(value) => {
+										if (value) {
+											field.handleChange(value);
+										}
+									}}
+									value={field.state.value}
+								>
+									<SelectTrigger id={field.name}>
+										<SelectValue placeholder="Select a contact (optional)" />
+									</SelectTrigger>
+									<SelectContent>
+										{contacts.map(
+											(contact: {
+												_id: GenericId<"contacts">;
+												fullName: string;
+											}) => (
+												<SelectItem key={contact._id} value={contact._id}>
+													{contact.fullName}
+												</SelectItem>
+											)
+										)}
+									</SelectContent>
+								</Select>
+							</Field>
+						)}
+					</form.Field>
+
+					{/* Start Date & Time */}
+					<div className="grid grid-cols-2 gap-4">
 						<form.Field
-							name="title"
+							name="startDate"
 							validators={{
 								onChange: ({ value }) => {
 									if (!value) {
-										return { message: "Title is required" };
+										return "Start date is required";
 									}
 									return undefined;
 								},
 							}}
 						>
 							{(field) => (
-								<div>
-									<label
-										className="mb-1 block font-medium text-gray-700 text-sm"
-										htmlFor={field.name}
-									>
-										Title *
-									</label>
-									<input
-										className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+								<Field>
+									<FieldLabel htmlFor={field.name}>Start Date *</FieldLabel>
+									<Input
 										id={field.name}
 										name={field.name}
 										onBlur={field.handleBlur}
 										onChange={(e) => field.handleChange(e.target.value)}
 										required
-										type="text"
+										type="date"
 										value={field.state.value}
 									/>
 									{field.state.meta.isTouched &&
 									field.state.meta.errors.length ? (
-										<p className="mt-1 text-red-600 text-sm">
+										<p className="mt-1 text-destructive text-sm">
 											{field.state.meta.errors.join(", ")}
 										</p>
 									) : null}
-								</div>
+								</Field>
 							)}
 						</form.Field>
 
-						{/* Contact Field */}
-						<form.Field name="contactId">
+						<form.Field
+							name="startTime"
+							validators={{
+								onChange: ({ value }) => {
+									if (!value) {
+										return "Start time is required";
+									}
+									return undefined;
+								},
+							}}
+						>
 							{(field) => (
-								<div>
-									<label
-										className="mb-1 block font-medium text-gray-700 text-sm"
-										htmlFor={field.name}
-									>
-										Contact
-									</label>
-									<select
-										className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+								<Field>
+									<FieldLabel htmlFor={field.name}>Start Time *</FieldLabel>
+									<Input
 										id={field.name}
 										name={field.name}
 										onBlur={field.handleBlur}
 										onChange={(e) => field.handleChange(e.target.value)}
-										value={field.state.value}
-									>
-										<option value="">Select a contact (optional)</option>
-										{contacts.map(
-											(contact: {
-												_id: GenericId<"contacts">;
-												fullName: string;
-											}) => (
-												<option key={contact._id} value={contact._id}>
-													{contact.fullName}
-												</option>
-											)
-										)}
-									</select>
-								</div>
-							)}
-						</form.Field>
-
-						{/* Start Date & Time */}
-						<div className="grid grid-cols-2 gap-4">
-							<form.Field
-								name="startDate"
-								validators={{
-									onChange: ({ value }) => {
-										if (!value) {
-											return { message: "Start date is required" };
-										}
-										return undefined;
-									},
-								}}
-							>
-								{(field) => (
-									<div>
-										<label
-											className="mb-1 block font-medium text-gray-700 text-sm"
-											htmlFor={field.name}
-										>
-											Start Date *
-										</label>
-										<input
-											className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-											id={field.name}
-											name={field.name}
-											onBlur={field.handleBlur}
-											onChange={(e) => field.handleChange(e.target.value)}
-											required
-											type="date"
-											value={field.state.value}
-										/>
-										{field.state.meta.isTouched &&
-										field.state.meta.errors.length ? (
-											<p className="mt-1 text-red-600 text-sm">
-												{field.state.meta.errors.join(", ")}
-											</p>
-										) : null}
-									</div>
-								)}
-							</form.Field>
-
-							<form.Field
-								name="startTime"
-								validators={{
-									onChange: ({ value }) => {
-										if (!value) {
-											return { message: "Start time is required" };
-										}
-										return undefined;
-									},
-								}}
-							>
-								{(field) => (
-									<div>
-										<label
-											className="mb-1 block font-medium text-gray-700 text-sm"
-											htmlFor={field.name}
-										>
-											Start Time *
-										</label>
-										<input
-											className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-											id={field.name}
-											name={field.name}
-											onBlur={field.handleBlur}
-											onChange={(e) => field.handleChange(e.target.value)}
-											required
-											type="time"
-											value={field.state.value}
-										/>
-										{field.state.meta.isTouched &&
-										field.state.meta.errors.length ? (
-											<p className="mt-1 text-red-600 text-sm">
-												{field.state.meta.errors.join(", ")}
-											</p>
-										) : null}
-									</div>
-								)}
-							</form.Field>
-						</div>
-
-						{/* End Date & Time */}
-						<div className="grid grid-cols-2 gap-4">
-							<form.Field
-								name="endDate"
-								validators={{
-									onChange: ({ value }) => {
-										if (!value) {
-											return { message: "End date is required" };
-										}
-										return undefined;
-									},
-								}}
-							>
-								{(field) => (
-									<div>
-										<label
-											className="mb-1 block font-medium text-gray-700 text-sm"
-											htmlFor={field.name}
-										>
-											End Date *
-										</label>
-										<input
-											className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-											id={field.name}
-											name={field.name}
-											onBlur={field.handleBlur}
-											onChange={(e) => field.handleChange(e.target.value)}
-											required
-											type="date"
-											value={field.state.value}
-										/>
-										{field.state.meta.isTouched &&
-										field.state.meta.errors.length ? (
-											<p className="mt-1 text-red-600 text-sm">
-												{field.state.meta.errors.join(", ")}
-											</p>
-										) : null}
-									</div>
-								)}
-							</form.Field>
-
-							<form.Field
-								name="endTime"
-								validators={{
-									onChange: ({ value }) => {
-										if (!value) {
-											return { message: "End time is required" };
-										}
-										return undefined;
-									},
-								}}
-							>
-								{(field) => (
-									<div>
-										<label
-											className="mb-1 block font-medium text-gray-700 text-sm"
-											htmlFor={field.name}
-										>
-											End Time *
-										</label>
-										<input
-											className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-											id={field.name}
-											name={field.name}
-											onBlur={field.handleBlur}
-											onChange={(e) => field.handleChange(e.target.value)}
-											required
-											type="time"
-											value={field.state.value}
-										/>
-										{field.state.meta.isTouched &&
-										field.state.meta.errors.length ? (
-											<p className="mt-1 text-red-600 text-sm">
-												{field.state.meta.errors.join(", ")}
-											</p>
-										) : null}
-									</div>
-								)}
-							</form.Field>
-						</div>
-
-						{/* Location Field */}
-						<form.Field name="location">
-							{(field) => (
-								<div>
-									<label
-										className="mb-1 block font-medium text-gray-700 text-sm"
-										htmlFor={field.name}
-									>
-										Location
-									</label>
-									<input
-										className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-										id={field.name}
-										name={field.name}
-										onBlur={field.handleBlur}
-										onChange={(e) => field.handleChange(e.target.value)}
-										placeholder="Office, Zoom, etc."
-										type="text"
+										required
+										type="time"
 										value={field.state.value}
 									/>
-								</div>
+									{field.state.meta.isTouched &&
+									field.state.meta.errors.length ? (
+										<p className="mt-1 text-destructive text-sm">
+											{field.state.meta.errors.join(", ")}
+										</p>
+									) : null}
+								</Field>
 							)}
 						</form.Field>
+					</div>
 
-						{/* Status Field */}
-						<form.Field name="status">
+					{/* End Date & Time */}
+					<div className="grid grid-cols-2 gap-4">
+						<form.Field
+							name="endDate"
+							validators={{
+								onChange: ({ value }) => {
+									if (!value) {
+										return "End date is required";
+									}
+									return undefined;
+								},
+							}}
+						>
 							{(field) => (
-								<div>
-									<label
-										className="mb-1 block font-medium text-gray-700 text-sm"
-										htmlFor={field.name}
-									>
-										Status
-									</label>
-									<select
-										className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
+								<Field>
+									<FieldLabel htmlFor={field.name}>End Date *</FieldLabel>
+									<Input
 										id={field.name}
 										name={field.name}
 										onBlur={field.handleBlur}
-										onChange={(e) =>
+										onChange={(e) => field.handleChange(e.target.value)}
+										required
+										type="date"
+										value={field.state.value}
+									/>
+									{field.state.meta.isTouched &&
+									field.state.meta.errors.length ? (
+										<p className="mt-1 text-destructive text-sm">
+											{field.state.meta.errors.join(", ")}
+										</p>
+									) : null}
+								</Field>
+							)}
+						</form.Field>
+
+						<form.Field
+							name="endTime"
+							validators={{
+								onChange: ({ value }) => {
+									if (!value) {
+										return "End time is required";
+									}
+									return undefined;
+								},
+							}}
+						>
+							{(field) => (
+								<Field>
+									<FieldLabel htmlFor={field.name}>End Time *</FieldLabel>
+									<Input
+										id={field.name}
+										name={field.name}
+										onBlur={field.handleBlur}
+										onChange={(e) => field.handleChange(e.target.value)}
+										required
+										type="time"
+										value={field.state.value}
+									/>
+									{field.state.meta.isTouched &&
+									field.state.meta.errors.length ? (
+										<p className="mt-1 text-destructive text-sm">
+											{field.state.meta.errors.join(", ")}
+										</p>
+									) : null}
+								</Field>
+							)}
+						</form.Field>
+					</div>
+
+					{/* Location Field */}
+					<form.Field name="location">
+						{(field) => (
+							<Field>
+								<FieldLabel htmlFor={field.name}>Location</FieldLabel>
+								<Input
+									id={field.name}
+									name={field.name}
+									onBlur={field.handleBlur}
+									onChange={(e) => field.handleChange(e.target.value)}
+									placeholder="Office, Zoom, etc."
+									type="text"
+									value={field.state.value}
+								/>
+							</Field>
+						)}
+					</form.Field>
+
+					{/* Status Field */}
+					<form.Field name="status">
+						{(field) => (
+							<Field>
+								<FieldLabel htmlFor={field.name}>Status</FieldLabel>
+								<Select
+									name={field.name}
+									onValueChange={(value) => {
+										if (value) {
 											field.handleChange(
-												e.target.value as
-													| "scheduled"
-													| "completed"
-													| "cancelled"
-											)
+												value as "scheduled" | "completed" | "cancelled"
+											);
 										}
-										value={field.state.value}
-									>
-										<option value="scheduled">Scheduled</option>
-										<option value="completed">Completed</option>
-										<option value="cancelled">Cancelled</option>
-									</select>
-								</div>
-							)}
-						</form.Field>
+									}}
+									value={field.state.value}
+								>
+									<SelectTrigger id={field.name}>
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="scheduled">Scheduled</SelectItem>
+										<SelectItem value="completed">Completed</SelectItem>
+										<SelectItem value="cancelled">Cancelled</SelectItem>
+									</SelectContent>
+								</Select>
+							</Field>
+						)}
+					</form.Field>
 
-						{/* Description Field */}
-						<form.Field name="description">
-							{(field) => (
-								<div>
-									<label
-										className="mb-1 block font-medium text-gray-700 text-sm"
-										htmlFor={field.name}
-									>
-										Description
-									</label>
-									<textarea
-										className="w-full rounded-md border border-gray-300 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
-										id={field.name}
-										name={field.name}
-										onBlur={field.handleBlur}
-										onChange={(e) => field.handleChange(e.target.value)}
-										rows={3}
-										value={field.state.value}
-									/>
-								</div>
-							)}
-						</form.Field>
+					{/* Description Field */}
+					<form.Field name="description">
+						{(field) => (
+							<Field>
+								<FieldLabel htmlFor={field.name}>Description</FieldLabel>
+								<Textarea
+									id={field.name}
+									name={field.name}
+									onBlur={field.handleBlur}
+									onChange={(e) => field.handleChange(e.target.value)}
+									rows={3}
+									value={field.state.value}
+								/>
+							</Field>
+						)}
+					</form.Field>
 
-						{/* Form Actions */}
-						<div className="flex gap-3 pt-4">
-							<form.Subscribe
-								selector={(state) => [state.canSubmit, state.isSubmitting]}
-							>
-								{([canSubmit, isSubmitting]) => (
-									<button
-										className="flex-1 rounded-md bg-blue-600 px-4 py-2 text-white transition-colors hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-										disabled={!canSubmit}
-										type="submit"
-									>
-										{getSubmitButtonText(isSubmitting)}
-									</button>
-								)}
-							</form.Subscribe>
-							<button
-								className="flex-1 rounded-md bg-gray-300 px-4 py-2 text-gray-700 transition-colors hover:bg-gray-400"
-								onClick={onClose}
-								type="button"
-							>
-								Cancel
-							</button>
-						</div>
-					</form>
-				</div>
-			</div>
+					{/* Form Actions */}
+					<div className="flex gap-3 pt-4">
+						<form.Subscribe
+							selector={(state) => [state.canSubmit, state.isSubmitting]}
+						>
+							{([canSubmit, isSubmitting]) => (
+								<Button
+									className="flex-1"
+									disabled={!canSubmit}
+									type="submit"
+									variant="default"
+								>
+									{getSubmitButtonText(isSubmitting)}
+								</Button>
+							)}
+						</form.Subscribe>
+						<Button
+							className="flex-1"
+							onClick={onClose}
+							type="button"
+							variant="outline"
+						>
+							Cancel
+						</Button>
+					</div>
+				</FieldGroup>
+			</form>
 		</div>
 	);
 }
