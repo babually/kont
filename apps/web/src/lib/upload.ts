@@ -76,6 +76,25 @@ export function useImageUpload() {
 	return { upload, isUploading };
 }
 
+export function useResolveImage() {
+	const getFileUrl = useAction(api.r2.getFileUrl);
+
+	const resolve = useCallback(
+		async (key: string | undefined | null) => {
+			if (!key) {
+				return undefined;
+			}
+			if (key.startsWith("http")) {
+				return key;
+			}
+			return await getFileUrl({ key });
+		},
+		[getFileUrl]
+	);
+
+	return { resolve };
+}
+
 export function createObjectURL(file: File): string {
 	return URL.createObjectURL(file);
 }

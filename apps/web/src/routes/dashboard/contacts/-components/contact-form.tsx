@@ -160,32 +160,21 @@ export function ContactForm({ contactId, onClose }: ContactFormProps) {
 					</div>
 				)}
 				<div className="flex items-center gap-6">
-					<div className="flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-muted shadow-sm">
-						{formData.image ? (
-							<ImageUpload
-								className="h-full w-full"
-								onRemove={() => {
-									setFormData((prev) => ({ ...prev, image: "" }));
-								}}
-								onUploadComplete={(key) => {
-									setFormData((prev) => ({ ...prev, image: key }));
-								}}
-								ref={imageUploadRef}
-								value={formData.image}
-							/>
-						) : (
-							<div className="flex h-full w-full items-center justify-center bg-muted text-muted-foreground">
+					<div className="relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-full bg-muted shadow-sm">
+						<ImageUpload
+							className="h-full w-full"
+							onRemove={() => {
+								setFormData((prev) => ({ ...prev, image: "" }));
+							}}
+							onUploadComplete={(key) => {
+								setFormData((prev) => ({ ...prev, image: key }));
+							}}
+							ref={imageUploadRef}
+							value={formData.image}
+						/>
+						{!formData.image && (
+							<div className="pointer-events-none absolute inset-0 flex items-center justify-center text-muted-foreground">
 								<Camera className="h-8 w-8" />
-								<ImageUpload
-									className="hidden"
-									onRemove={() => {
-										setFormData((prev) => ({ ...prev, image: "" }));
-									}}
-									onUploadComplete={(key) => {
-										setFormData((prev) => ({ ...prev, image: key }));
-									}}
-									ref={imageUploadRef}
-								/>
 							</div>
 						)}
 					</div>

@@ -30,6 +30,8 @@ import {
 	Phone,
 	Trash2,
 } from "lucide-react";
+import { useEffect, useState } from "react";
+import { useResolveImage } from "@/lib/upload";
 
 interface ContactCardProps {
 	contact: {
@@ -49,6 +51,17 @@ interface ContactCardProps {
 }
 
 export function ContactCard({ contact, onDelete, onEdit }: ContactCardProps) {
+	const [imageUrl, setImageUrl] = useState<string | undefined>(undefined);
+	const { resolve } = useResolveImage();
+
+	useEffect(() => {
+		if (contact.image) {
+			resolve(contact.image).then(setImageUrl);
+		} else {
+			setImageUrl(undefined);
+		}
+	}, [contact.image, resolve]);
+
 	const getInitials = (name: string) => {
 		return name
 			.split(" ")
@@ -64,11 +77,11 @@ export function ContactCard({ contact, onDelete, onEdit }: ContactCardProps) {
 				<Item className="w-full gap-2.5 p-0">
 					<ItemMedia>
 						<Avatar className="h-11 w-11 shadow-md ring-2 ring-background">
-							{contact.image ? (
+							{imageUrl ? (
 								<AvatarImage
 									alt={contact.fullName}
 									className="object-cover"
-									src={contact.image}
+									src={imageUrl}
 								/>
 							) : (
 								<AvatarFallback className="bg-linear-to-br from-primary to-primary/80 font-semibold text-primary-foreground text-sm">
@@ -79,13 +92,16 @@ export function ContactCard({ contact, onDelete, onEdit }: ContactCardProps) {
 					</ItemMedia>
 					<ItemContent className="gap-0">
 						<ItemTitle>{contact.fullName}</ItemTitle>
-						<ItemDescription className="text-xs">
-							<Badge
-								className={cn("mt-1 px-2 py-0.5 font-medium text-[10px]")}
-								variant="secondary"
-							>
-								{contact.tags}
-							</Badge>
+						<ItemDescription className="flex flex-wrap gap-1 text-xs">
+							{contact.tags?.map((tag) => (
+								<Badge
+									className={cn("px-2 py-2 font-medium text-[10px]")}
+									key={tag}
+									variant="secondary"
+								>
+									{tag}
+								</Badge>
+							))}
 						</ItemDescription>
 					</ItemContent>
 					<ItemActions className="-me-1">

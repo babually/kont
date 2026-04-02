@@ -15,6 +15,7 @@ import {
 	createObjectURL,
 	revokeObjectURL,
 	useImageUpload,
+	useResolveImage,
 	validateImageFile,
 } from "@/lib/upload";
 
@@ -45,8 +46,12 @@ export const ImageUpload = forwardRef<ImageUploadHandle, ImageUploadProps>(
 	) => {
 		const inputRef = useRef<HTMLInputElement>(null);
 		const [preview, setPreview] = useState<string | undefined>(undefined);
+		const [resolvedUrl, setResolvedUrl] = useState<string | undefined>(
+			undefined
+		);
 		const [isDragging, setIsDragging] = useState(false);
 		const { upload, isUploading } = useImageUpload();
+		const { resolve } = useResolveImage();
 
 		useImperativeHandle(ref, () => ({
 			triggerUpload: () => {
@@ -62,6 +67,14 @@ export const ImageUpload = forwardRef<ImageUploadHandle, ImageUploadProps>(
 				setPreview(undefined);
 			}
 		}, [preview]);
+
+		useEffect(() => {
+			if (value) {
+				resolve(value).then(setResolvedUrl);
+			} else {
+				setResolvedUrl(undefined);
+			}
+		}, [value, resolve]);
 
 		useEffect(() => {
 			return () => {
@@ -136,7 +149,7 @@ export const ImageUpload = forwardRef<ImageUploadHandle, ImageUploadProps>(
 			setIsDragging(false);
 		}, []);
 
-		const displayUrl = preview ?? value;
+		const displayUrl = preview ?? resolvedUrl ?? value;
 		const isBusy = isUploading || disabled;
 
 		return (

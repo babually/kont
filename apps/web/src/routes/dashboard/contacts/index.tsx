@@ -3,11 +3,7 @@ import { api } from "@kont/backend/convex/_generated/api";
 import type { Id } from "@kont/backend/convex/_generated/dataModel";
 import { Badge } from "@kont/ui/components/badge";
 import { Button } from "@kont/ui/components/button";
-import {
-	Dialog,
-	DialogContent,
-	DialogTrigger,
-} from "@kont/ui/components/dialog";
+import { Dialog, DialogContent } from "@kont/ui/components/dialog";
 import { cn } from "@kont/ui/lib/utils";
 import { useSuspenseQuery } from "@tanstack/react-query";
 import { createFileRoute } from "@tanstack/react-router";
@@ -37,12 +33,14 @@ function RouteComponent() {
 	const tagCounts =
 		contacts?.reduce(
 			(acc, contact) => {
-				contact.tags?.forEach((tag) => {
-					const trimmed = tag.trim();
-					if (trimmed) {
-						acc[trimmed] = (acc[trimmed] || 0) + 1;
+				if (contact.tags) {
+					for (const tag of contact.tags) {
+						const trimmed = tag.trim();
+						if (trimmed) {
+							acc[trimmed] = (acc[trimmed] || 0) + 1;
+						}
 					}
-				});
+				}
 				return acc;
 			},
 			{} as Record<string, number>
@@ -66,6 +64,8 @@ function RouteComponent() {
 		: contacts;
 
 	const [isDialogOpen, setIsDialogOpen] = useState(false);
+	const [editingContactId, setEditingContactId] =
+		useState<Id<"contacts"> | null>(null);
 
 	const handleDeleteContact = async (id: Id<"contacts">) => {
 		try {
@@ -75,8 +75,14 @@ function RouteComponent() {
 		}
 	};
 
-	const handleEditContact = (_id: Id<"contacts">) => {
-		console.log("Edit contact:", _id);
+	const handleEditContact = (id: Id<"contacts">) => {
+		setEditingContactId(id);
+		setIsDialogOpen(true);
+	};
+
+	const handleAddContact = () => {
+		setEditingContactId(null);
+		setIsDialogOpen(true);
 	};
 
 	const isLoading = contacts === undefined;
@@ -139,15 +145,24 @@ function RouteComponent() {
 							<SlidersHorizontal className="h-4 w-4" />
 							Select
 						</Button>
-						<Dialog onOpenChange={setIsDialogOpen} open={isDialogOpen}>
-							<DialogTrigger>
-								<Button>
-									<Plus className="mr-2 h-4 w-4" />
-									Add Contact
-								</Button>
-							</DialogTrigger>
+						<Dialog
+							onOpenChange={(open) => {
+								setIsDialogOpen(open);
+								if (!open) {
+									setEditingContactId(null);
+								}
+							}}
+							open={isDialogOpen}
+						>
+							<Button onClick={handleAddContact}>
+								<Plus className="mr-2 h-4 w-4" />
+								Add Contact
+							</Button>
 							<DialogContent>
-								<ContactForm onClose={() => setIsDialogOpen(false)} />
+								<ContactForm
+									contactId={editingContactId}
+									onClose={() => setIsDialogOpen(false)}
+								/>
 							</DialogContent>
 						</Dialog>
 					</div>
