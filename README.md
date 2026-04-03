@@ -1,8 +1,8 @@
 # kont
 
-This project was created with [Better-T-Stack](https://github.com/AmanVarshney01/create-better-t-stack), a modern TypeScript stack that combines React, TanStack Start, Convex, and more.
+Contact Management System created using modern TypeScript stack that combines React, TanStack Start, Convex, and more.
 
-## Features
+## Tech Stacks
 
 - **TypeScript** - For type safety and improved developer experience
 - **TanStack Start** - SSR framework with TanStack Router
@@ -93,3 +93,7 @@ kont/
 - `pnpm run dev:setup`: Setup and configure your Convex project
 - `pnpm run check-types`: Check TypeScript types across all apps
 - `pnpm run check`: Run Biome formatting and linting
+
+## Acknowledge
+- **[Better-t-stack](https://better-t-stack.dev/)**
+- **[Shadcn](https://ui.shadcn.com)**
